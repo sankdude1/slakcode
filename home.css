@@ -1,3 +1,6 @@
+/* home.css */
+
+/* Your existing reset and body styles */
 * {
     margin: 0;
     padding: 0;
@@ -7,8 +10,49 @@
 body {
     background-color: #3f30c4;
     color: #d9beee;
+    /* IMPORTANT: Add padding-top to body to prevent content hiding under fixed nav */
+    padding-top: 60px; /* Adjust this value if your nav bar appears taller or shorter */
 }
 
+/* --- Navigation Bar Styling --- */
+header {
+    background-color: #282c34; /* A dark background for the header/nav */
+    color: #ffffff; /* White text for the nav (though links will be different) */
+    padding: 10px 0; /* Some vertical padding for the header */
+    position: fixed; /* Makes the navigation bar stick to the top when scrolling */
+    width: 100%;     /* Makes it span the full width of the screen */
+    top: 0;          /* Positions it at the very top */
+    left: 0;         /* Positions it at the very left */
+    z-index: 1000;   /* Ensures it stays on top of other content */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+}
+
+.main-nav ul {
+    list-style: none; /* Removes the default bullet points from the list */
+    text-align: center; /* Centers the navigation links horizontally */
+    margin: 0;       /* Ensure no default margin pushes it around */
+    padding: 0;      /* Ensure no default padding */
+}
+
+.main-nav ul li {
+    display: inline-block; /* Makes list items display side-by-side horizontally */
+    margin: 0 20px; /* Adds horizontal space between each menu item */
+}
+
+.main-nav ul li a {
+    color: #171599; /* A vibrant blue color for the navigation links */
+    text-decoration: none; /* Removes the default underline from links */
+    font-weight: bold; /* Makes the link text bold */
+    padding: 5px 0; /* Small vertical padding, mostly for the hover effect area */
+    transition: color 0.3s ease; /* Smooth transition for color change on hover */
+}
+
+.main-nav ul li a:hover {
+    color: #ff2e63; /* Changes link color on mouse hover (e.g., to a pink/red) */
+}
+
+/* --- Your existing section styles --- */
+/* (Keep these as they are or modify them as you wish) */
 .section-one {
     background-color: #99abff;
     padding: 50px;
@@ -18,8 +62,7 @@ body {
 .section-two {
     background-color: #7cb372;
     padding: 50px;
-    /* Add margin-bottom here to space it from section-three, if you want a gap */
-    margin-bottom: 20px; /* <--- ADD THIS LINE to match the gap from section-one */
+    margin-bottom: 20px;
 }
 
 .section-three {
