@@ -3,10 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="home.css"> <link rel="stylesheet" href="ide.css"> 
+    <title>Blot IDE</title>
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="ide.css">
 </head>
 <body>
-    <p>this page is not done yet</p>
+
+    <main class="ide-container">
+        <div class="left-pane">
+            <div class="file-preview">
+                <p>File Preview</p>
+            </div>
+            <div class="code-editor">
+                <textarea id="blot-editor" placeholder="Start coding in Blot here..."></textarea>
+            </div>
+            <div class="terminal-commands" id="blot-terminal"> <p>Terminal Output:</p>
+            </div>
+        </div>
+
+        <div class="right-pane">
+            <div class="console-settings">
+                <p>Console & Settings</p>
+            </div>
+            <div class="computer-screen-preview">
+                <p>Computer Screen Preview / HUB! Simulator</p>
+            </div>
+            <div class="normal-preview">
+                <p>Normal Preview</p>
+            </div>
+            <div class="command-bar">
+                <p>Command Bar</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="blot.js"></script> </body>
 </body>
 </html>

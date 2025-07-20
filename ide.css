@@ -1,10 +1,100 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ide.css */
+
+/* ... (your existing * and body styles) ... */
+
+body {
+    background-color: rgb(54, 54, 54);
+    color: rgb(255, 255, 255);
+    /* No padding-top here, as you decided to remove the nav bar from blot.html */
+    min-height: 100vh; /* Ensure the body itself stretches to at least the full viewport height */
+    display: flex; /* Use flexbox on body to make main take up available space */
+    flex-direction: column;
 }
 
-body{
-    background-color:rgb(54, 54, 54);
-    color:rgb(255, 255, 255);
+
+.ide-container {
+    display: grid; /* This enables CSS Grid for the layout */
+    grid-template-columns: 1fr 2fr; /* Creates two columns: left pane (1 part), right pane (2 parts) */
+    /* You can adjust 1fr 2fr to change relative widths, e.g., 1fr 1fr for equal */
+    gap: 10px; /* Adds space between the columns and rows */
+    height: calc(100vh - 0px); /* Make the container fill the remaining viewport height. */
+                               /* Adjust 0px if you add a top bar later. */
+    width: 100%;
+    overflow: hidden; /* Prevents scrollbars from appearing prematurely */
+}
+
+.left-pane,
+.right-pane {
+    display: flex; /* Use flexbox to stack items vertically within each pane */
+    flex-direction: column;
+    /* Add a temporary border to see the panes clearly */
+    border: 1px solid rgb(100, 100, 100);
+    background-color: rgb(40, 40, 40); /* Slightly lighter background for panes */
+    padding: 5px; /* Some padding inside the panes */
+}
+
+/* Make sure the content within the panes stretches */
+.file-preview,
+.code-editor,
+.terminal-commands,
+.console-settings,
+.computer-screen-preview,
+.normal-preview,
+.command-bar {
+    /* flex-grow: 1; */ /* This might be added later for specific sections to grow */
+    background-color: rgb(30, 30, 30); /* Even darker background for individual sections */
+    margin-bottom: 5px; /* Small space between sections within a pane */
+    padding: 10px;
+    /* Add a temporary border for individual sections */
+    border: 1px dashed rgb(80, 80, 80);
+}
+
+/* Specific height adjustments for sections */
+.file-preview {
+    height: 15%; /* Example: 15% of left-pane height */
+}
+
+.code-editor {
+    flex-grow: 1; /* Makes the code editor take up remaining space in the left pane */
+    height: auto; /* Allow content to define height initially */
+}
+
+.terminal-commands {
+    height: 20%; /* Example: 20% of left-pane height */
+    margin-bottom: 0;
+    overflow-y: auto; /* ADD THIS LINE: Adds a vertical scrollbar when content overflows */
+    /* You might want to adjust padding or background if needed for the scrollbar's appearance */
+}
+
+.console-settings {
+    height: 20%; /* Example: 20% of right-pane height */
+}
+
+.computer-screen-preview {
+    flex-grow: 1; /* Makes the computer screen preview take up most space in the right pane */
+    height: auto;
+}
+
+.normal-preview {
+    height: 25%; /* Example: 25% of right-pane height */
+}
+
+.command-bar {
+    height: 5%; /* Example: small bar at the bottom */
+    margin-bottom: 0;
+}
+
+
+/* Styling the textarea for the code editor */
+#blot-editor {
+    width: 100%;
+    height: 100%; /* Make it fill its parent .code-editor div */
+    background-color: #282a36; /* Darker background for the editor itself */
+    color: #f8f8f2; /* Light text color */
+    border: none; /* Remove default border */
+    outline: none; /* Remove outline on focus */
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace; /* Monospaced font */
+    font-size: 14px;
+    resize: none; /* Prevent manual resizing by user */
+    padding: 10px;
 }
