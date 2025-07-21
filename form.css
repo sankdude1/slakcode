@@ -1,0 +1,73 @@
+/* form.css */
+
+/* Universal Reset: Applies to ALL elements */
+* {
+    box-sizing: border-box; /* Makes sure padding and border are included in an element's total width and height */
+    margin: 0;             /* Removes default browser margins */
+    padding: 0;            /* Removes default browser padding */
+}
+
+/* Body Styling: Helps center the entire signup container on the page */
+body {
+    font-family: Arial, sans-serif; /* A common, clean font */
+    display: flex;         /* Use Flexbox for easy centering of its children */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center;   /* Centers content vertically */
+    min-height: 100vh;     /* Ensures the body takes up the full height of the viewport */
+    background-color: #f4f4f4; /* A light background color for the page */
+    /* Note: If home.css also styles the body, there might be conflicts.
+       You might need to adjust based on which styles you want to prioritize. */
+}
+
+/* Signup Container Styling: Centers text and applies padding/visuals to the form box */
+.signup-container {
+    background-color: #fff; /* White background for the form box */
+    padding: 30px;         /* Padding inside the form box */
+    border-radius: 8px;    /* Slightly rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* A subtle shadow for depth */
+    width: 100%;           /* Take full width of parent (up to max-width) */
+    max-width: 400px;      /* Limits the form's maximum width for readability */
+    text-align: center;    /* Centers text content within this container (like the <h2>) */
+}
+
+/* Form Styling: Arranges input fields vertically */
+.signup-form {
+    display: flex;
+    flex-direction: column; /* Stacks username, password fields, and button vertically */
+    gap: 15px; /* Adds space between the form groups */
+}
+
+/* Form Group Styling: Aligns labels and inputs */
+.form-group {
+    text-align: left; /* Ensures labels and inputs within each group align to the left */
+}
+
+.form-group label {
+    display: block; /* Makes the label take its own line */
+    margin-bottom: 5px; /* Space between label and input */
+    font-weight: bold; /* Makes the label text bold */
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;       /* Inputs take full width of their parent group */
+    padding: 10px;     /* Padding inside the input fields */
+    border: 1px solid #ddd; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded input corners */
+}
+
+/* Submit Button Styling */
+.submit-button {
+    background-color: #007bff; /* A nice blue color for the button */
+    color: white;             /* White text on the button */
+    padding: 10px 15px;
+    border: none;             /* No border */
+    border-radius: 4px;
+    cursor: pointer;          /* Cursor changes to a hand on hover */
+    font-size: 16px;
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.submit-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
