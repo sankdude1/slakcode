@@ -32,6 +32,7 @@ $logged_in_username = htmlspecialchars($_SESSION['username']);
                 <li><a href="#">HUB!</a></li>
                 <li><a href="signup.php">Sign Up</a></li>
                 <li><a href="login.php">Login</a></li> </ul>
+                <li><a href="logout.php">Logout</a></li>
         </nav>
 
         <h1>Welcome to the Home Page!</h1>

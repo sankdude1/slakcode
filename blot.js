@@ -1,10 +1,25 @@
-// blot.js  <-- Corrected this comment syntax
+// blot.js
 
 // 1. Get a reference to your Blot editor (the textarea)
 const blotEditor = document.getElementById('blot-editor');
 
 // 2. Get a reference to your Terminal/Commands area (where you'll show output)
 const blotTerminal = document.getElementById('blot-terminal');
+
+// Get a reference to the canvas and its 2D context
+const blotCanvas = document.getElementById('blot-canvas');
+const ctx = blotCanvas.getContext('2d');
+
+// Set initial canvas dimensions
+function resizeCanvas() {
+    blotCanvas.width = blotCanvas.offsetWidth;
+    blotCanvas.height = blotCanvas.offsetHeight; // CORRECTED: Now uses offsetHeight for height
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Initial call to set size
+
+// Object to store Blot variables
+const blotVariables = {};
 
 // Function to add text to the terminal
 function appendToTerminal(text, type = 'output') {
@@ -15,66 +30,139 @@ function appendToTerminal(text, type = 'output') {
     blotTerminal.scrollTop = blotTerminal.scrollHeight; // Scroll to the bottom
 }
 
-// Function to process a single command line (moved out for reusability)
-function processCommand(commandLine) {
-    const command = commandLine.toLowerCase().split(' ')[0]; // Get the first word as the command
-    const args = commandLine.substring(command.length).trim(); // Get everything after the command
+// --- NEW: Helper function to create a delay (Promise-based) ---
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+// ---------------------------------------------------------------
 
-    if (command === 'print-t') {
-        if (args.length > 0) {
-            appendToTerminal(args);
-        } else {
-            appendToTerminal("Error: 'print-t' command requires text to print. Usage: print-t Hello World", 'error-message');
+// --- NEW: Asynchronous function to process a single Blot command line ---
+async function processBlotCommand(line) {
+    const originalLine = line.trim(); // Keep original line for display and specific parsing
+    const normalizedLine = originalLine.toLowerCase(); // Use normalized for command matching
+    if (!normalizedLine) return; // Skip empty lines
+
+    const commandParts = normalizedLine.split(' ');
+    const command = commandParts[0];
+    const args = originalLine.substring(command.length).trim(); // Use original line for arguments
+
+    // Only display input line if it's not the "run" command itself
+    if (command !== 'run') {
+        appendToTerminal(`> ${originalLine}`, 'input-line');
+    }
+
+
+    try {
+        if (command === 'print-t') {
+            if (args.length > 0) {
+                appendToTerminal(args);
+            } else {
+                appendToTerminal("Error: 'print-t' command requires text to print. Usage: print-t Hello World", 'error-message');
+            }
+        } else if (command === 'clear') {
+            blotTerminal.innerHTML = '';
+            appendToTerminal("Terminal cleared.", 'system-message');
+        } else if (command === 'link-greet') {
+            appendToTerminal("!filing");
+            appendToTerminal(">print-t hello"); // This specific line has print-t already
+            appendToTerminal("Hello there!");
+            appendToTerminal("Welcome to slakcodes BLOT editor!");
+            appendToTerminal("For your first command, please put 'print-t hi'(without the '') hi as ur first line");
+        } else if (command === 'let.this') {
+            // Original line is needed for proper value extraction if it has mixed case or special chars
+            const originalLineParts = originalLine.split(' ');
+            if (originalLineParts.length >= 4 && originalLineParts[2] === '=') {
+                const varName = originalLineParts[1];
+                const varValue = originalLine.substring(originalLine.indexOf('=') + 1).trim(); // Use original line for value
+
+                if (varName && varValue) {
+                    blotVariables[varName] = varValue;
+                    appendToTerminal(`Variable '${varName}' set to '${varValue}'.`);
+                } else {
+                    appendToTerminal("Error: 'let.this' command requires a variable name and a value. Usage: let.this myVar = value", 'error-message');
+                }
+            } else {
+                appendToTerminal("Error: Invalid 'let.this' command syntax. Usage: let.this myVar = value", 'error-message');
+            }
+        } else if (command === '/dlet') {
+            const varToDisplay = commandParts[1];
+            if (varToDisplay) {
+                if (blotVariables.hasOwnProperty(varToDisplay)) {
+                    appendToTerminal(`Value of '${varToDisplay}': ${blotVariables[varToDisplay]}`);
+                } else {
+                    appendToTerminal(`Error: Variable '${varToDisplay}' not found.`, 'error-message');
+                }
+            } else {
+                appendToTerminal("Error: '/dlet' command requires a variable name. Usage: /dlet myVar", 'error-message');
+            }
+        } else if (command === 'frame-fillwhole2d') {
+            const colorArg = commandParts[1];
+            if (colorArg) {
+                ctx.fillStyle = colorArg;
+                ctx.fillRect(0, 0, blotCanvas.width, blotCanvas.height);
+                appendToTerminal(`Screen filled with color: ${colorArg}`);
+            } else {
+                appendToTerminal("Error: 'frame-fillwhole2d' requires a color. Usage: frame-fillwhole2d red OR frame-fillwhole2d #FF0000", 'error-message');
+            }
+        } else if (command === 'wait') {
+            const delaySeconds = parseFloat(commandParts[1]);
+
+            if (!isNaN(delaySeconds) && delaySeconds >= 0) {
+                const delayMs = delaySeconds * 1000;
+                appendToTerminal(`Waiting for ${delaySeconds} seconds...`, 'system-message');
+                await delay(delayMs); // AWAITING THE DELAY HERE!
+                appendToTerminal("Done waiting.", 'system-message');
+            } else {
+                appendToTerminal("Error: 'wait' command requires a positive number (in seconds). Usage: wait 2 OR wait 0.5", 'error-message');
+            }
+        } else if (command === 'run') {
+            // The 'run' command itself doesn't do anything here directly,
+            // its execution is handled by the keydown listener's decision logic.
+            // This 'else if' block is primarily to prevent it from falling into 'Unknown command'.
         }
-    }
-    else if (command === 'clear') {
-        blotTerminal.innerHTML = ''; // Clears the terminal output
-        appendToTerminal("Terminal cleared.", 'system-message');
-    }
-    else if (command === 'link-greet'){
-        appendToTerminal("!filing");
-        appendToTerminal(">print-t hello")
-        appendToTerminal("Hello there!")
-        appendToTerminal("Welcome to slakcodes BLOT editor!")
-        appendToTerminal("For your first command, please put 'print-t hi'(without the '') hi as ur first line")
-    }
-    else {
-        // If no recognized command
-        appendToTerminal(`Error: Unknown command "${commandLine}"`, 'error-message');
+        else {
+            appendToTerminal(`Error: Unknown command "${originalLine}"`, 'error-message'); // Use original 'line' for unknown
+        }
+    } catch (e) {
+        appendToTerminal(`Runtime Error: ${e.message}`, 'error-message');
     }
 }
+// -------------------------------------------------------------------------
 
-// 3. Listen for key presses in the editor
-blotEditor.addEventListener('keydown', function(event) {
-    // Enter key: Simply adds a new line in the textarea
-    if (event.key === 'Enter') {
-        // No event.preventDefault() here, so the default Enter behavior (new line) will happen.
-        // Command processing is now handled by the Tab key.
+// --- NEW: Asynchronous function to execute ALL code in the editor ---
+async function executeAllCode() {
+    appendToTerminal("--- Running Blot Code ---", 'system-message');
+    const allCode = blotEditor.value;
+    const lines = allCode.split('\n');
+
+    for (const line of lines) {
+        await processBlotCommand(line); // AWAIT EACH COMMAND
     }
-    // Tab key: Runs all code in the editor
-    else if (event.key === 'Tab') {
-        event.preventDefault(); // Prevent default tab behavior (like indenting or changing focus)
+    appendToTerminal("--- Code Execution Finished ---", 'system-message');
+}
+// -----------------------------------------------------------------
 
-        const editorContent = blotEditor.value.trim(); // Get ALL content from the editor
-        const lines = editorContent.split('\n'); // Split into individual lines
+// Listen for key presses in the editor
+blotEditor.addEventListener('keydown', async function(event) { // ADD 'async' HERE
+    // Check if Alt key is pressed AND the 'f' key is pressed
+    if (event.key === 'f' && event.altKey) {
+        event.preventDefault();
 
-        appendToTerminal("--- Running Code ---", 'system-message');
+        const inputValue = blotEditor.value.trim();
+        const lines = inputValue.split('\n');
+        const lastLineContent = lines[lines.length - 1].trim(); // Get the last line content (trimmed)
+        const lastLineCommand = lastLineContent.toLowerCase(); // Convert to lowercase for comparison
 
-        // Process each line as a command
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-            if (trimmedLine) { // Only process non-empty lines
-                appendToTerminal(`> ${trimmedLine}`, 'input-line'); // Show the line being processed in terminal
-                processCommand(trimmedLine); // Call the function to process this line as a command
-            }
-        });
-
-        appendToTerminal("--- Code Finished ---", 'system-message');
+        if (lastLineCommand === 'run') { // If the last line is "run", execute all code
+            await executeAllCode(); // AWAIT THE ENTIRE CODE EXECUTION
+        } else { // Otherwise, just execute the last command typed
+            await processBlotCommand(lastLineContent); // Execute the last line
+        }
     }
 });
 
 // Initial message in the terminal
-appendToTerminal("Blot IDE ready. Type your commands on separate lines, then press TAB to run.", 'system-message');
-appendToTerminal("Try: 'print-t Hello Blot'", 'system-message');
-appendToTerminal("Then type 'clear' on a new line, and press TAB again to run both!", 'system-message'); // <-- THIS IS THE CORRECTED LINE
-appendToTerminal("New to Blot? Try typing 'link-greet' to get started!", 'system-message'); // Add this line
+appendToTerminal("Blot IDE ready. Type commands and press ALT + F to execute the last line.", 'system-message');
+appendToTerminal("Type 'run' on a new line and press ALT + F to execute ALL code.", 'system-message');
+appendToTerminal("Try 'print-t Your Message', 'let.this myVar = 123', '/dlet myVar', 'frame-fillwhole2d blue', or 'wait 2'.", 'system-message');
+appendToTerminal("You can also try 'clear' or 'link-greet'.", 'system-message');

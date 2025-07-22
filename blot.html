@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blot IDE</title>
-    <link rel="stylesheet" href="home.css">
+
     <link rel="stylesheet" href="ide.css">
 </head>
 <body>
@@ -17,7 +17,8 @@
             <div class="code-editor">
                 <textarea id="blot-editor" placeholder="Start coding in Blot here..."></textarea>
             </div>
-            <div class="terminal-commands" id="blot-terminal"> <p>Terminal Output:</p>
+            <div class="terminal-commands" id="blot-terminal">
+                <p>Terminal Output:</p>
             </div>
         </div>
 
@@ -26,7 +27,7 @@
                 <p>Console & Settings</p>
             </div>
             <div class="computer-screen-preview">
-                <p>Computer Screen Preview / HUB! Simulator</p>
+                <canvas id="blot-canvas"></canvas>
             </div>
             <div class="normal-preview">
                 <p>Normal Preview</p>
@@ -37,6 +38,7 @@
         </div>
     </main>
 
-    <script src="blot.js"></script> </body>
+    <script src="blot.js"></script>
+
 </body>
 </html>

@@ -1,100 +1,133 @@
 /* ide.css */
 
-/* ... (your existing * and body styles) ... */
-
-body {
-    background-color: rgb(54, 54, 54);
-    color: rgb(255, 255, 255);
-    /* No padding-top here, as you decided to remove the nav bar from blot.html */
-    min-height: 100vh; /* Ensure the body itself stretches to at least the full viewport height */
-    display: flex; /* Use flexbox on body to make main take up available space */
-    flex-direction: column;
+/* --- Base Styles --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background-color: #282c34;
+    color: #abb2bf;
+    overflow: hidden;
 }
 
-
+/* --- Main IDE Container Layout --- */
 .ide-container {
-    display: grid; /* This enables CSS Grid for the layout */
-    grid-template-columns: 1fr 2fr; /* Creates two columns: left pane (1 part), right pane (2 parts) */
-    /* You can adjust 1fr 2fr to change relative widths, e.g., 1fr 1fr for equal */
-    gap: 10px; /* Adds space between the columns and rows */
-    height: calc(100vh - 0px); /* Make the container fill the remaining viewport height. */
-                               /* Adjust 0px if you add a top bar later. */
-    width: 100%;
-    overflow: hidden; /* Prevents scrollbars from appearing prematurely */
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
-.left-pane,
-.right-pane {
-    display: flex; /* Use flexbox to stack items vertically within each pane */
+/* --- Left and Right Panes Layout --- */
+.left-pane, .right-pane {
+    display: flex;
     flex-direction: column;
-    /* Add a temporary border to see the panes clearly */
-    border: 1px solid rgb(100, 100, 100);
-    background-color: rgb(40, 40, 40); /* Slightly lighter background for panes */
-    padding: 5px; /* Some padding inside the panes */
+    flex: 1;
+    padding: 10px;
+    gap: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-/* Make sure the content within the panes stretches */
+/* --- Individual Section Styling (Fixed or Min-Height, should not grow) --- */
 .file-preview,
-.code-editor,
-.terminal-commands,
 .console-settings,
-.computer-screen-preview,
 .normal-preview,
 .command-bar {
-    /* flex-grow: 1; */ /* This might be added later for specific sections to grow */
-    background-color: rgb(30, 30, 30); /* Even darker background for individual sections */
-    margin-bottom: 5px; /* Small space between sections within a pane */
+    background-color: #3e4452;
+    border: 1px solid #4b5263;
     padding: 10px;
-    /* Add a temporary border for individual sections */
-    border: 1px dashed rgb(80, 80, 80);
+    min-height: 50px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
-/* Specific height adjustments for sections */
-.file-preview {
-    height: 15%; /* Example: 15% of left-pane height */
-}
-
+/* --- Code Editor Layout (Should take remaining space) --- */
 .code-editor {
-    flex-grow: 1; /* Makes the code editor take up remaining space in the left pane */
-    height: auto; /* Allow content to define height initially */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Code editor should take ALL remaining space */
+    flex-basis: 0;
+    min-height: 0;
 }
 
+/* --- Terminal Layout (FIXED, MUCH SMALLER HEIGHT) --- */
 .terminal-commands {
-    height: 20%; /* Example: 20% of left-pane height */
-    margin-bottom: 0;
-    overflow-y: auto; /* ADD THIS LINE: Adds a vertical scrollbar when content overflows */
-    /* You might want to adjust padding or background if needed for the scrollbar's appearance */
+    display: flex;
+    flex-direction: column;
+    height: 60px; /* NEW: Set a very small fixed height for the terminal */
+    flex-shrink: 0; /* Important: prevent it from shrinking */
+    flex-grow: 0; /* Important: prevent it from growing beyond fixed height */
+    min-height: 0;
+    border: 2px solid red; 
 }
 
-.console-settings {
-    height: 20%; /* Example: 20% of right-pane height */
-}
-
-.computer-screen-preview {
-    flex-grow: 1; /* Makes the computer screen preview take up most space in the right pane */
-    height: auto;
-}
-
-.normal-preview {
-    height: 25%; /* Example: 25% of right-pane height */
-}
-
-.command-bar {
-    height: 5%; /* Example: small bar at the bottom */
-    margin-bottom: 0;
-}
-
-
-/* Styling the textarea for the code editor */
+/* --- Textarea for Code Editor --- */
 #blot-editor {
     width: 100%;
-    height: 100%; /* Make it fill its parent .code-editor div */
-    background-color: #282a36; /* Darker background for the editor itself */
-    color: #f8f8f2; /* Light text color */
-    border: none; /* Remove default border */
-    outline: none; /* Remove outline on focus */
-    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace; /* Monospaced font */
-    font-size: 14px;
-    resize: none; /* Prevent manual resizing by user */
+    height: 100%; /* Fill parent (.code-editor) height */
+    background-color: #21252b;
+    color: #e6e6e6;
+    border: 1px solid #4b5263;
     padding: 10px;
+    font-size: 14px;
+    resize: none;
+    box-sizing: border-box;
+    overflow-y: auto;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+/* --- Terminal Output Area --- */
+#blot-terminal {
+    background-color: #21252b;
+    border: 1px solid #4b5263;
+    padding: 10px;
+    height: 100%; /* Fills its fixed-height parent */
+    box-sizing: border-box;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Styles for individual lines within the terminal */
+#blot-terminal p {
+    margin: 0;
+    padding: 2px 0;
+    line-height: 1.3;
+}
+
+#blot-terminal p.input-line {
+    color: #98c379;
+}
+#blot-terminal p.error-message {
+    color: #e06c75;
+}
+#blol-terminal p.system-message { /* Typo here, should be blot-terminal */
+    color: #61afef;
+}
+
+/* --- Computer Screen Preview (Canvas Container) --- */
+.computer-screen-preview {
+    background-color: #000;
+    border: 3px solid limegreen; /* TEMPORARY: Keep for now to debug screen stretching if needed */
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+}
+
+/* The Canvas itself */
+#blot-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
