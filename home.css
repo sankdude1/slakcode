@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #3f30c4;
+    background-color: #f8007c;
     color: #d9beee;
     /* IMPORTANT: Add padding-top to body to prevent content hiding under fixed nav */
     padding-top: 60px; /* Adjust this value if your nav bar appears taller or shorter */

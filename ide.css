@@ -8,61 +8,93 @@ html, body {
     font-family: 'Consolas', 'Monaco', monospace;
     background-color: #282c34;
     color: #abb2bf;
-    overflow: hidden;
+    overflow: hidden; /* Prevent body scroll, main container handles it */
+}
+
+/* --- Menu Bar Styles (NEW) --- */
+.menu-bar {
+    display: flex; /* Arrange menu items horizontally */
+    align-items: center; /* Vertically align items in the middle */
+    background-color: #3e4452; /* Darker background for the bar */
+    border-bottom: 1px solid #4b5263; /* Separator line */
+    height: 40px; /* Fixed height for the menu bar */
+    padding: 0 10px; /* Horizontal padding */
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
+    flex-shrink: 0; /* Prevent menu bar from shrinking */
+}
+
+.menu-item {
+    padding: 8px 15px; /* Padding for each menu item */
+    cursor: pointer; /* Indicates it's clickable */
+    user-select: none; /* Prevent text selection on click */
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+.menu-item:hover {
+    background-color: #4b5263; /* Lighter background on hover */
 }
 
 /* --- Main IDE Container Layout --- */
 .ide-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    box-sizing: border-box;
+    display: flex; /* Arrange children (left-pane, right-pane) side-by-side */
+    /* UPDATED: Calculate height based on remaining space after menu-bar */
+    height: calc(100vh - 40px); /* 100% viewport height MINUS menu-bar height */
+    width: 100vw; /* Take full viewport width */
+    overflow: hidden; /* Hide any content overflowing the main container */
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
 }
 
 /* --- Left and Right Panes Layout --- */
 .left-pane, .right-pane {
     display: flex;
-    flex-direction: column;
-    flex: 1;
+    flex-direction: column; /* Stack children vertically */
+    flex: 1; /* Both panes take equal width */
     padding: 10px;
-    gap: 10px;
+    gap: 10px; /* Space between vertical sections */
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: hidden; /* Important: hide overflow here, let inner elements scroll */
 }
 
 /* --- Individual Section Styling (Fixed or Min-Height, should not grow) --- */
 .file-preview,
 .console-settings,
-.normal-preview,
-.command-bar {
+.command-bar { /* Normal Preview moved below to grow */
     background-color: #3e4452;
     border: 1px solid #4b5263;
     padding: 10px;
-    min-height: 50px;
+    min-height: 50px; /* Minimum height for these sections */
     box-sizing: border-box;
-    flex-shrink: 0;
-    flex-grow: 0;
+    flex-shrink: 0; /* Prevent these sections from shrinking */
+    flex-grow: 0; /* Do not allow these to grow */
 }
 
-/* --- Code Editor Layout (Should take remaining space) --- */
+/* --- Code Editor Layout (Should take majority of remaining space in left pane) --- */
 .code-editor {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Code editor should take ALL remaining space */
-    flex-basis: 0;
-    min-height: 0;
+    flex-grow: 2; /* Allows it to grow significantly, relative to terminal */
+    flex-basis: 0; /* Helps distribute space based on flex-grow */
+    min-height: 0; /* Essential for flex items inside a column layout with overflow */
 }
 
-/* --- Terminal Layout (FIXED, MUCH SMALLER HEIGHT) --- */
+/* --- Terminal Layout (Should take a smaller portion of remaining space in left pane) --- */
 .terminal-commands {
     display: flex;
     flex-direction: column;
-    height: 60px; /* NEW: Set a very small fixed height for the terminal */
-    flex-shrink: 0; /* Important: prevent it from shrinking */
-    flex-grow: 0; /* Important: prevent it from growing beyond fixed height */
-    min-height: 0;
-    border: 2px solid red; 
+    flex-grow: 1; /* Allows it to grow, but less than the code editor */
+    flex-basis: 0; /* Helps distribute space based on flex-grow */
+    min-height: 0; /* Essential for flex items inside a column layout with overflow */
+}
+
+/* --- Normal Preview Layout (Should take remaining space in right pane) --- */
+.normal-preview {
+    background-color: #3e4452;
+    border: 1px solid #4b5263;
+    padding: 10px;
+    flex-grow: 1; /* Allows Normal Preview to take remaining space */
+    flex-basis: 0; /* Helps distribute space based on flex-grow */
+    min-height: 0; /* Essential for flex items inside a column layout with overflow */
+    box-sizing: border-box;
 }
 
 /* --- Textarea for Code Editor --- */
@@ -74,11 +106,11 @@ html, body {
     border: 1px solid #4b5263;
     padding: 10px;
     font-size: 14px;
-    resize: none;
+    resize: none; /* Prevent manual resizing */
     box-sizing: border-box;
-    overflow-y: auto;
-    white-space: pre;
-    word-wrap: normal;
+    overflow-y: auto; /* Use 'auto' to show scrollbar only when needed */
+    white-space: pre; /* Preserve whitespace exactly */
+    word-wrap: normal; /* Don't break words by default */
 }
 
 /* --- Terminal Output Area --- */
@@ -86,48 +118,26 @@ html, body {
     background-color: #21252b;
     border: 1px solid #4b5263;
     padding: 10px;
-    height: 100%; /* Fills its fixed-height parent */
+    height: 100%; /* Fill parent (.terminal-commands) height */
     box-sizing: border-box;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    overflow-y: auto; /* Use 'auto' to show scrollbar only when needed */
+    white-space: pre-wrap; /* Preserve whitespace and wrap long lines */
+    word-wrap: break-word; /* Break long words that don't fit */
 }
 
 /* Styles for individual lines within the terminal */
 #blot-terminal p {
     margin: 0;
     padding: 2px 0;
-    line-height: 1.3;
+    line-height: 1.3; /* Slightly more space between lines */
 }
 
 #blot-terminal p.input-line {
-    color: #98c379;
+    color: #98c379; /* Green for input */
 }
 #blot-terminal p.error-message {
-    color: #e06c75;
+    color: #e06c75; /* Red for errors */
 }
-#blol-terminal p.system-message { /* Typo here, should be blot-terminal */
-    color: #61afef;
-}
-
-/* --- Computer Screen Preview (Canvas Container) --- */
-.computer-screen-preview {
-    background-color: #000;
-    border: 3px solid limegreen; /* TEMPORARY: Keep for now to debug screen stretching if needed */
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-    min-height: 0;
-}
-
-/* The Canvas itself */
-#blot-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
+#blot-terminal p.system-message {
+    color: #61afef; /* Blue for system messages */
 }

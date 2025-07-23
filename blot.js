@@ -1,22 +1,20 @@
+
+
 // blot.js
 
 // 1. Get a reference to your Blot editor (the textarea)
 const blotEditor = document.getElementById('blot-editor');
-
 // 2. Get a reference to your Terminal/Commands area (where you'll show output)
 const blotTerminal = document.getElementById('blot-terminal');
 
-// Get a reference to the canvas and its 2D context
-const blotCanvas = document.getElementById('blot-canvas');
-const ctx = blotCanvas.getContext('2d');
+// 3. Get references to your menu items
+const saveTxtMenuItem = document.getElementById('saveTxtMenuItem');
+const uploadMenuItem = document.getElementById('uploadMenuItem');
+const loadMenuItem = document.getElementById('loadMenuItem');
+const blotFileInput = document.getElementById('blotFileInput'); // Reference to the hidden file input
 
-// Set initial canvas dimensions
-function resizeCanvas() {
-    blotCanvas.width = blotCanvas.offsetWidth;
-    blotCanvas.height = blotCanvas.offsetHeight; // CORRECTED: Now uses offsetHeight for height
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // Initial call to set size
+// A global variable to keep track of what triggered the file input
+let fileActionType = ''; // Can be 'upload' or 'load'
 
 // Object to store Blot variables
 const blotVariables = {};
@@ -30,27 +28,18 @@ function appendToTerminal(text, type = 'output') {
     blotTerminal.scrollTop = blotTerminal.scrollHeight; // Scroll to the bottom
 }
 
-// --- NEW: Helper function to create a delay (Promise-based) ---
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-// ---------------------------------------------------------------
-
-// --- NEW: Asynchronous function to process a single Blot command line ---
-async function processBlotCommand(line) {
-    const originalLine = line.trim(); // Keep original line for display and specific parsing
-    const normalizedLine = originalLine.toLowerCase(); // Use normalized for command matching
+// Function to process a single Blot command line
+function processBlotCommand(line) {
+    const originalLine = line.trim();
+    const normalizedLine = originalLine.toLowerCase();
     if (!normalizedLine) return; // Skip empty lines
 
     const commandParts = normalizedLine.split(' ');
     const command = commandParts[0];
     const args = originalLine.substring(command.length).trim(); // Use original line for arguments
 
-    // Only display input line if it's not the "run" command itself
-    if (command !== 'run') {
-        appendToTerminal(`> ${originalLine}`, 'input-line');
-    }
-
+    // Always display the input line as it's processed
+    appendToTerminal(`> ${originalLine}`, 'input-line');
 
     try {
         if (command === 'print-t') {
@@ -64,16 +53,15 @@ async function processBlotCommand(line) {
             appendToTerminal("Terminal cleared.", 'system-message');
         } else if (command === 'link-greet') {
             appendToTerminal("!filing");
-            appendToTerminal(">print-t hello"); // This specific line has print-t already
+            appendToTerminal(">print-t hello");
             appendToTerminal("Hello there!");
             appendToTerminal("Welcome to slakcodes BLOT editor!");
             appendToTerminal("For your first command, please put 'print-t hi'(without the '') hi as ur first line");
         } else if (command === 'let.this') {
-            // Original line is needed for proper value extraction if it has mixed case or special chars
             const originalLineParts = originalLine.split(' ');
             if (originalLineParts.length >= 4 && originalLineParts[2] === '=') {
                 const varName = originalLineParts[1];
-                const varValue = originalLine.substring(originalLine.indexOf('=') + 1).trim(); // Use original line for value
+                const varValue = originalLine.substring(originalLine.indexOf('=') + 1).trim();
 
                 if (varName && varValue) {
                     blotVariables[varName] = varValue;
@@ -95,74 +83,173 @@ async function processBlotCommand(line) {
             } else {
                 appendToTerminal("Error: '/dlet' command requires a variable name. Usage: /dlet myVar", 'error-message');
             }
-        } else if (command === 'frame-fillwhole2d') {
-            const colorArg = commandParts[1];
-            if (colorArg) {
-                ctx.fillStyle = colorArg;
-                ctx.fillRect(0, 0, blotCanvas.width, blotCanvas.height);
-                appendToTerminal(`Screen filled with color: ${colorArg}`);
-            } else {
-                appendToTerminal("Error: 'frame-fillwhole2d' requires a color. Usage: frame-fillwhole2d red OR frame-fillwhole2d #FF0000", 'error-message');
-            }
-        } else if (command === 'wait') {
-            const delaySeconds = parseFloat(commandParts[1]);
-
-            if (!isNaN(delaySeconds) && delaySeconds >= 0) {
-                const delayMs = delaySeconds * 1000;
-                appendToTerminal(`Waiting for ${delaySeconds} seconds...`, 'system-message');
-                await delay(delayMs); // AWAITING THE DELAY HERE!
-                appendToTerminal("Done waiting.", 'system-message');
-            } else {
-                appendToTerminal("Error: 'wait' command requires a positive number (in seconds). Usage: wait 2 OR wait 0.5", 'error-message');
-            }
-        } else if (command === 'run') {
-            // The 'run' command itself doesn't do anything here directly,
-            // its execution is handled by the keydown listener's decision logic.
-            // This 'else if' block is primarily to prevent it from falling into 'Unknown command'.
-        }
-        else {
-            appendToTerminal(`Error: Unknown command "${originalLine}"`, 'error-message'); // Use original 'line' for unknown
+        } else {
+            appendToTerminal(`Error: Unknown command "${originalLine}"`, 'error-message');
         }
     } catch (e) {
         appendToTerminal(`Runtime Error: ${e.message}`, 'error-message');
     }
 }
-// -------------------------------------------------------------------------
 
-// --- NEW: Asynchronous function to execute ALL code in the editor ---
-async function executeAllCode() {
+// Function to execute ALL code in the editor
+function executeAllCode() {
     appendToTerminal("--- Running Blot Code ---", 'system-message');
     const allCode = blotEditor.value;
     const lines = allCode.split('\n');
 
     for (const line of lines) {
-        await processBlotCommand(line); // AWAIT EACH COMMAND
+        processBlotCommand(line);
     }
     appendToTerminal("--- Code Execution Finished ---", 'system-message');
 }
-// -----------------------------------------------------------------
 
-// Listen for key presses in the editor
-blotEditor.addEventListener('keydown', async function(event) { // ADD 'async' HERE
-    // Check if Alt key is pressed AND the 'f' key is pressed
+// Function to handle "Save txt" (Save As) functionality
+function saveAsTxtFile() {
+    const codeContent = blotEditor.value; // Get content from the editor
+    const blob = new Blob([codeContent], { type: 'text/plain;charset=utf-8' }); // Create a Blob
+    const url = URL.createObjectURL(blob); // Create a URL for the Blob
+
+    const a = document.createElement('a'); // Create a temporary link element
+    a.href = url; // Set the link's href to the Blob URL
+    a.download = 'my_blot_code.txt'; // Set the default download filename
+    document.body.appendChild(a); // Append the link to the body (needed for Firefox)
+    a.click(); // Programmatically click the link to trigger download
+    document.body.removeChild(a); // Remove the link
+    URL.revokeObjectURL(url); // Clean up the Blob URL
+
+    appendToTerminal("Code saved as 'my_blot_code.txt'.", 'system-message');
+}
+
+// NEW FUNCTION: Handles sending the file to the PHP server
+async function uploadGameToServer(file, gameName, gameDescription) {
+    const formData = new FormData();
+    formData.append('gameCodeFile', file); // 'gameCodeFile' is the name PHP expects ($_FILES['gameCodeFile'])
+    formData.append('gameName', gameName); // Add game name to form data
+    formData.append('gameDescription', gameDescription); // Add game description to form data
+
+    try {
+        const response = await fetch('upload.php', { // Ensure this path is correct for your server
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json(); // PHP returns JSON
+
+        if (response.ok) { // Check if HTTP status is 2xx
+            if (result.success) {
+                appendToTerminal(`Upload successful! ${result.message}`, 'system-message');
+                appendToTerminal(`Your game is at: ${result.fileUrl}`, 'system-message');
+                console.log('Uploaded game URL:', result.fileUrl);
+            } else {
+                appendToTerminal(`Upload failed: ${result.message}`, 'error-message');
+                console.error('Upload error:', result.message);
+            }
+        } else {
+            appendToTerminal(`Server error during upload: HTTP ${response.status} ${response.statusText}`, 'error-message');
+            console.error('Server error response:', result); // Log the server's response even if not successful
+        }
+
+    } catch (error) {
+        appendToTerminal(`Network error during upload: ${error.message}`, 'error-message');
+        console.error('Network error:', error);
+    }
+}
+
+
+// MODIFIED: Function to handle file selection for Upload OR Load
+function handleFileSelect(event) {
+    const files = event.target.files;
+    if (files.length === 0) {
+        appendToTerminal("No file selected.", 'system-message');
+        event.target.value = ''; // Clear the file input value
+        return;
+    }
+
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const fileContent = e.target.result;
+
+        if (fileActionType === 'upload') {
+            appendToTerminal(`Preparing to upload '${file.name}'...`, 'system-message');
+
+            // Prompt for game name and description
+            const gameName = prompt("Please enter a name for your game:");
+            if (!gameName) {
+                appendToTerminal("Upload cancelled: Game name is required.", 'error-message');
+                event.target.value = ''; // Clear input
+                return;
+            }
+
+            const gameDescription = prompt(`Please enter a short description for '${gameName}':`);
+            // Description can be empty, so no check here
+
+            // Call the upload function with the file, name, and description
+            uploadGameToServer(file, gameName, gameDescription);
+            event.target.value = ''; // Clear the file input value
+        } else if (fileActionType === 'load') {
+            blotEditor.value = fileContent; // Load content into the editor
+            appendToTerminal(`Loaded '${file.name}' into the editor.`, 'system-message');
+            event.target.value = ''; // Clear the file input value
+        }
+    };
+
+    reader.onerror = function(e) {
+        appendToTerminal(`Error reading file: ${e.message}`, 'error-message');
+        event.target.value = ''; // Clear input on error too
+    };
+
+    reader.readAsText(file); // Read the file as plain text
+}
+
+
+// --- Event Listeners ---
+
+// Listen for key presses in the editor (Alt + F)
+blotEditor.addEventListener('keydown', function(event) {
     if (event.key === 'f' && event.altKey) {
         event.preventDefault();
-
-        const inputValue = blotEditor.value.trim();
-        const lines = inputValue.split('\n');
-        const lastLineContent = lines[lines.length - 1].trim(); // Get the last line content (trimmed)
-        const lastLineCommand = lastLineContent.toLowerCase(); // Convert to lowercase for comparison
-
-        if (lastLineCommand === 'run') { // If the last line is "run", execute all code
-            await executeAllCode(); // AWAIT THE ENTIRE CODE EXECUTION
-        } else { // Otherwise, just execute the last command typed
-            await processBlotCommand(lastLineContent); // Execute the last line
-        }
+        executeAllCode();
     }
 });
 
+// Add event listener for "Save txt" menu item
+if (saveTxtMenuItem) {
+    saveTxtMenuItem.addEventListener('click', saveAsTxtFile);
+} else {
+    console.error("Save txt menu item not found. Check your HTML structure or selector.");
+}
+
+// Add event listener for "Upload" menu item
+if (uploadMenuItem) {
+    uploadMenuItem.addEventListener('click', () => {
+        fileActionType = 'upload'; // Set action type
+        blotFileInput.click(); // Programmatically click the hidden file input
+    });
+} else {
+    console.error("Upload menu item not found. Check your HTML structure or selector.");
+}
+
+// Add event listener for "Load" menu item
+if (loadMenuItem) {
+    loadMenuItem.addEventListener('click', () => {
+        fileActionType = 'load'; // Set action type
+        blotFileInput.click(); // Programmatically click the hidden file input
+    });
+} else {
+    console.error("Load menu item not found. Check your HTML structure or selector.");
+}
+
+// Add event listener for when a file is selected in the hidden input
+if (blotFileInput) {
+    blotFileInput.addEventListener('change', handleFileSelect);
+} else {
+    console.error("Hidden file input not found. Check your HTML structure or ID.");
+}
+
+
 // Initial message in the terminal
-appendToTerminal("Blot IDE ready. Type commands and press ALT + F to execute the last line.", 'system-message');
-appendToTerminal("Type 'run' on a new line and press ALT + F to execute ALL code.", 'system-message');
-appendToTerminal("Try 'print-t Your Message', 'let.this myVar = 123', '/dlet myVar', 'frame-fillwhole2d blue', or 'wait 2'.", 'system-message');
+appendToTerminal("Blot IDE ready. Type commands and press ALT + F to execute all code.", 'system-message');
+appendToTerminal("Try 'print-t Your Message', 'let.this myVar = 123', or '/dlet myVar'.", 'system-message');
 appendToTerminal("You can also try 'clear' or 'link-greet'.", 'system-message');
